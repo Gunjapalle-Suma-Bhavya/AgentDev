@@ -11,6 +11,13 @@ import {
   SystemHealth,
   ApiEndpoint,
   ApiRequestLog,
+  AgentNetworkNode,
+  AgentNetworkEdge,
+  AgentMessage,
+  CommandChatMessage,
+  ProjectAnalytics,
+  ProjectTemplate,
+  ProjectProposal,
 } from '../types';
 
 const BASE_URL = '';
@@ -50,8 +57,38 @@ export const api = {
   cancelTask: (taskId: string) => request<any>(`/api/task/${taskId}/cancel`, { method: 'POST' }),
   retryTask: (taskId: string) => request<{ status: string; task_id: string }>(`/api/task/${taskId}/retry`, { method: 'POST' }),
 
-  // Projects & Files
+  // Multi-Agent Network & Visual Topology
+  getAgentNetwork: () => request<{ nodes: AgentNetworkNode[]; edges: AgentNetworkEdge[] }>('/api/agents/network'),
+  getAgentMessages: (taskId?: string) =>
+    request<{ messages: AgentMessage[] }>(taskId ? `/api/agents/messages?task_id=${taskId}` : '/api/agents/messages'),
+
+  // AI Command Center
+  sendCommandChat: (message: string, projectName: string = '', mode: string = 'chat') =>
+    request<{ reply: string; mode: string; project_name: string; timestamp: string }>('/api/command/chat', {
+      method: 'POST',
+      body: JSON.stringify({ message, project_name: projectName, mode }),
+    }),
+  getChatHistory: (projectName?: string) =>
+    request<{ chats: CommandChatMessage[] }>(projectName ? `/api/command/history?project_name=${projectName}` : '/api/command/history'),
+
+  // Project Analytics Dashboard
+  getProjectAnalytics: (projectName: string) => request<ProjectAnalytics>(`/api/analytics/${projectName}`),
+
+  // Templates & Idea Generation
+  getTemplates: () => request<{ templates: ProjectTemplate[] }>('/api/templates'),
+  generateIdeas: (domain: string) => request<{ domain: string; proposals: ProjectProposal[] }>('/api/ideas/generate', {
+    method: 'POST',
+    body: JSON.stringify({ domain }),
+  }),
+
+  // Projects & Files Management
   getProjects: () => request<{ projects: ProjectMetadata[] }>('/api/projects'),
+  deleteProject: (projectName: string) => request<any>(`/api/projects/${projectName}`, { method: 'DELETE' }),
+  duplicateProject: (projectName: string, newName: string) =>
+    request<any>(`/api/projects/${projectName}/duplicate`, {
+      method: 'POST',
+      body: JSON.stringify({ new_name: newName }),
+    }),
   getProjectFiles: (projectName: string) => request<{ project_name: string; files: ProjectFile[] }>(`/api/projects/${projectName}/files`),
   getFileContent: (projectName: string, filePath: string) =>
     request<{ project_name: string; file_path: string; extension: string; content: string }>(

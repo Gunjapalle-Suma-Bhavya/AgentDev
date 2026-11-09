@@ -19,11 +19,14 @@ import { OverviewDashboard } from './views/OverviewDashboard';
 import { NewProjectWizard } from './views/NewProjectWizard';
 import { RepositoriesView } from './views/RepositoriesView';
 import { AgentWorkspace } from './views/AgentWorkspace';
+import { AgentNetworkView } from './views/AgentNetworkView';
 import { ExecutionMonitor } from './views/ExecutionMonitor';
 import { CodeExplorer } from './views/CodeExplorer';
+import { CommandCenterView } from './views/CommandCenterView';
 import { ActivityStream } from './views/ActivityStream';
 import { ArchitectureCenter } from './views/ArchitectureCenter';
 import { QACenter } from './views/QACenter';
+import { AnalyticsDashboard } from './views/AnalyticsDashboard';
 import { ApprovalsView } from './views/ApprovalsView';
 import { DocumentationView } from './views/DocumentationView';
 import { APIMonitor } from './views/APIMonitor';
@@ -31,7 +34,7 @@ import { SettingsView } from './views/SettingsView';
 
 export const App: React.FC = () => {
   const [currentView, setCurrentView] = useState<ViewType>('overview');
-  const [activeProject, setActiveProject] = useState<string>('');
+  const [activeProject, setActiveProject] = useState<string>('cyber_nethra_core');
   const [health, setHealth] = useState<SystemHealth | null>(null);
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [projects, setProjects] = useState<ProjectMetadata[]>([]);
@@ -203,6 +206,8 @@ export const App: React.FC = () => {
             />
           )}
 
+          {currentView === 'agent-network' && <AgentNetworkView />}
+
           {currentView === 'workspace' && <AgentWorkspace roles={roles} activeTask={activeTaskData} />}
 
           {currentView === 'execution' && (
@@ -213,6 +218,8 @@ export const App: React.FC = () => {
               onCopyLogs={() => addToast('Logs copied to clipboard.', 'success')}
             />
           )}
+
+          {currentView === 'command-center' && <CommandCenterView activeProject={activeProject} />}
 
           {currentView === 'explorer' && (
             <CodeExplorer
@@ -233,6 +240,14 @@ export const App: React.FC = () => {
               activeProject={activeProject}
               onSelectProject={setActiveProject}
               onAuditFinished={(score) => addToast(`QA Audit completed! Score: ${score}%`, 'success')}
+            />
+          )}
+
+          {currentView === 'analytics' && (
+            <AnalyticsDashboard
+              projects={projects}
+              activeProject={activeProject}
+              onSelectProject={setActiveProject}
             />
           )}
 

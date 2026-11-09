@@ -3,11 +3,14 @@ export type ViewType =
   | 'new-project'
   | 'projects'
   | 'workspace'
+  | 'agent-network'
   | 'execution'
   | 'explorer'
+  | 'command-center'
   | 'activity'
   | 'architecture'
   | 'qa'
+  | 'analytics'
   | 'approvals'
   | 'documentation'
   | 'api-monitor'
@@ -69,6 +72,91 @@ export interface AgentActivity {
   message: string;
   duration_sec: number;
   timestamp: string;
+}
+
+export interface AgentNetworkNode {
+  id: string;
+  name: string;
+  role: string;
+  icon: string;
+  persona: string;
+  status: 'idle' | 'running' | 'completed' | 'failed';
+  workload: number;
+  tokens_consumed: number;
+  tools: string[];
+  primary_action: string;
+  output_artifact: string;
+}
+
+export interface AgentNetworkEdge {
+  from: string;
+  to: string;
+  channel: string;
+  message_count: number;
+  type: string;
+}
+
+export interface AgentMessage {
+  id: number;
+  task_id: string;
+  from_agent: string;
+  to_agent: string;
+  topic: string;
+  content: string;
+  timestamp: string;
+}
+
+export interface CommandChatMessage {
+  id?: number;
+  role: 'user' | 'assistant';
+  mode: 'chat' | 'explain' | 'bugs' | 'optimize' | 'docs' | 'schema';
+  message: string;
+  timestamp?: string;
+}
+
+export interface FileMetric {
+  file: string;
+  loc: number;
+  extension: string;
+  size_bytes: number;
+}
+
+export interface ProjectAnalytics {
+  project_name: string;
+  total_loc: number;
+  file_count: number;
+  languages: Record<string, number>;
+  file_metrics: FileMetric[];
+  agent_distribution: Record<string, number>;
+  estimated_tokens: number;
+  estimated_cost_usd: number;
+}
+
+export interface ProjectTemplate {
+  id: string;
+  name: string;
+  title: string;
+  category: string;
+  tagline: string;
+  targetUsers: string;
+  objectives: string;
+  framework: string;
+  database: string;
+  pattern: string;
+  functionalReqs: string;
+  nonFunctionalReqs: string;
+  complexity: string;
+  estimatedRounds: number;
+}
+
+export interface ProjectProposal {
+  name: string;
+  title: string;
+  category: string;
+  tagline: string;
+  framework: string;
+  database: string;
+  core_features: string[];
 }
 
 export interface ApprovalItem {

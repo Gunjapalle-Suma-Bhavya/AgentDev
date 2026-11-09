@@ -34,6 +34,11 @@ def run_all_tests():
         ("/api/qa/reports", 200),
         ("/api/monitor/endpoints", 200),
         ("/api/monitor/requests", 200),
+        ("/api/agents/network", 200),
+        ("/api/agents/messages", 200),
+        ("/api/analytics/cyber_nethra_core", 200),
+        ("/api/templates", 200),
+        ("/api/command/history", 200),
     ]
 
     print("=" * 60)

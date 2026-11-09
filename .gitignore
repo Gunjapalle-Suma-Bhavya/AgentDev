@@ -207,3 +207,7 @@ scratch_master_prompt.txt
 # Preserve sample reference repository in workspace
 !workspace/cyber_nethra_core/
 !workspace/cyber_nethra_core/**
+
+# Preserve compiled frontend production distribution for instant plug-and-play
+!frontend/dist/
+!frontend/dist/**
