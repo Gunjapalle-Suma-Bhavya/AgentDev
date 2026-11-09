@@ -796,6 +796,103 @@ def generate_project_proposals(domain: str) -> List[Dict[str, Any]]:
             }
         ]
 
+def get_project_architecture(project_name: str) -> Dict[str, Any]:
+    """
+    Dynamically extract or generate architecture diagrams and specifications for a project.
+    Reads real docs/ from workspace if present, or dynamically synthesizes project architecture.
+    """
+    proj_dir = WORKSPACE_DIR / project_name
+    docs_dir = proj_dir / "docs"
+    
+    design_mermaid = ""
+    prd_summary = ""
+    tasks_list = []
+    
+    # 1. Inspect system_design/design.md
+    design_file = docs_dir / "system_design" / "design.md"
+    if design_file.exists():
+        content = design_file.read_text(encoding="utf-8", errors="replace")
+        import re
+        m = re.search(r"```mermaid\s*\n(.*?)\n```", content, re.DOTALL)
+        if m:
+            design_mermaid = m.group(1).strip()
+    
+    # 2. Inspect prds/prd.md
+    prd_file = docs_dir / "prds" / "prd.md"
+    if prd_file.exists():
+        prd_summary = prd_file.read_text(encoding="utf-8", errors="replace")[:600]
+        
+    # 3. Inspect tasks/tasks.md
+    tasks_file = docs_dir / "tasks" / "tasks.md"
+    if tasks_file.exists():
+        t_content = tasks_file.read_text(encoding="utf-8", errors="replace")
+        for line in t_content.splitlines():
+            line_s = line.strip()
+            if line_s.startswith("-") or (len(line_s) > 2 and line_s[0].isdigit() and line_s[1] in (".", ":")):
+                tasks_list.append(line_s)
+
+    # Fallback to dynamic, project-tailored architecture diagram if not found on disk
+    if not design_mermaid:
+        clean_name = project_name.replace("_", " ").title()
+        design_mermaid = f"""graph TD
+    Client["Client Interface (React / Mobile)"] -->|HTTPS / REST API| Gateway["FastAPI API Gateway (main.py)"]
+    Gateway --> Auth["Security & Auth Middleware (rbac_auth.py)"]
+    Gateway --> CoreService["Core Domain Service ({project_name}_core.py)"]
+    Gateway --> EventEngine["Async Event Orchestrator (events.py)"]
+    CoreService --> DB[("Transactional SQLite / Postgres DB")]
+    CoreService --> Cache[("In-Memory State Cache")]
+    EventEngine --> Telemetry["AgentDev Telemetry Bus"]"""
+
+    sequence_mermaid = f"""sequenceDiagram
+    autonumber
+    actor User as Product Owner
+    participant PM as Alice (Product Manager)
+    participant Arch as Bob (System Architect)
+    participant PMgr as Eve (Project Manager)
+    participant Eng as Alex (Software Engineer)
+    participant QA as David (QA Engineer)
+
+    User->>PM: Request Requirements for {project_name}
+    PM->>PM: Formulate PRD & Acceptance Criteria
+    PM->>Arch: Pass Product Requirement Document (PRD)
+    Arch->>Arch: System Design, UML & Interface Contracts
+    Arch->>PMgr: Emit Architecture Specification
+    PMgr->>PMgr: Task Decomposition & Dependency Graph
+    PMgr->>Eng: Dispatch File Implementation Tasks
+    Eng->>Eng: Autonomous Source Code Generation
+    Eng->>QA: Submit Modules for Code Review
+    QA->>QA: AST Syntax Verification & PyTest Suite
+    QA->>User: Deployment Ready Repository Delivered"""
+
+    class_mermaid = f"""classDiagram
+    class {project_name.title().replace('_', '')}Service {{
+        +String service_id
+        +String status
+        +create_record(data: dict) dict
+        +get_status() str
+        +execute_pipeline() bool
+    }}
+    class AuthManager {{
+        +verify_token(token: str) bool
+        +has_permission(role: str) bool
+    }}
+    class PersistenceStore {{
+        +Connection conn
+        +save_state(entity: dict) void
+        +query_records(filter: dict) list
+    }}
+    {project_name.title().replace('_', '')}Service --> AuthManager : validates via
+    {project_name.title().replace('_', '')}Service --> PersistenceStore : persists to"""
+
+    return {
+        "project_name": project_name,
+        "design_mermaid": design_mermaid,
+        "sequence_mermaid": sequence_mermaid,
+        "class_mermaid": class_mermaid,
+        "prd_summary": prd_summary,
+        "tasks": tasks_list[:10]
+    }
+
 # Seed initial agent messages if empty
 init_db()
 

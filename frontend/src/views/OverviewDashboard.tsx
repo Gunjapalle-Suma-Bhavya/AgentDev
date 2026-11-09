@@ -21,6 +21,7 @@ interface OverviewProps {
   activities: AgentActivity[];
   onNavigate: (view: ViewType) => void;
   onOpenExplorer: (name: string) => void;
+  onRunSimulation?: () => void;
 }
 
 export const OverviewDashboard: React.FC<OverviewProps> = ({
@@ -29,6 +30,7 @@ export const OverviewDashboard: React.FC<OverviewProps> = ({
   activities,
   onNavigate,
   onOpenExplorer,
+  onRunSimulation,
 }) => {
   return (
     <div className="space-y-6">
@@ -49,6 +51,14 @@ export const OverviewDashboard: React.FC<OverviewProps> = ({
             >
               <Plus className="w-4 h-4" /> Create New Project
             </button>
+            {onRunSimulation && (
+              <button
+                onClick={onRunSimulation}
+                className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded text-xs font-medium inline-flex items-center gap-2 shadow-sm transition animate-pulse"
+              >
+                <Cpu className="w-4 h-4" /> ▶️ Run Live Agent Simulation
+              </button>
+            )}
             <button
               onClick={() => onNavigate('projects')}
               className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded text-xs font-medium inline-flex items-center gap-2 transition"

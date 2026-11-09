@@ -84,7 +84,7 @@ export const App: React.FC = () => {
 
   useEffect(() => {
     refreshData();
-    const interval = setInterval(refreshData, 10000);
+    const interval = setInterval(refreshData, 2000);
     return () => clearInterval(interval);
   }, []);
 
@@ -124,6 +124,18 @@ export const App: React.FC = () => {
       setCurrentView('execution');
     } catch (err: any) {
       addToast(`Launch failed: ${err.message}`, 'error');
+    }
+  };
+
+  const handleRunSimulation = async () => {
+    try {
+      const proj = activeProject || 'cyber_nethra_core';
+      const res = await api.simulateAgentRun(proj, 'Autonomous Multi-Agent Engineering Demonstration');
+      addToast(`Simulation dispatched! Task ID: ${res.task_id}`, 'success');
+      setActiveTaskId(res.task_id);
+      setCurrentView('execution');
+    } catch (err: any) {
+      addToast(`Simulation failed: ${err.message}`, 'error');
     }
   };
 
@@ -190,6 +202,7 @@ export const App: React.FC = () => {
                 setActiveProject(name);
                 setCurrentView('explorer');
               }}
+              onRunSimulation={handleRunSimulation}
             />
           )}
 
@@ -232,7 +245,13 @@ export const App: React.FC = () => {
 
           {currentView === 'activity' && <ActivityStream activities={activities} />}
 
-          {currentView === 'architecture' && <ArchitectureCenter />}
+          {currentView === 'architecture' && (
+            <ArchitectureCenter
+              activeProject={activeProject}
+              projects={projects}
+              onSelectProject={setActiveProject}
+            />
+          )}
 
           {currentView === 'qa' && (
             <QACenter

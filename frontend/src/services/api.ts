@@ -113,6 +113,27 @@ export const api = {
   getQAReports: (projectName?: string) =>
     request<{ reports: QAReport[] }>(projectName ? `/api/qa/reports?project_name=${encodeURIComponent(projectName)}` : '/api/qa/reports'),
 
+  // Software Architecture & Simulation
+  getProjectArchitecture: (projectName: string) =>
+    request<{
+      project_name: string;
+      design_mermaid: string;
+      sequence_mermaid: string;
+      class_mermaid: string;
+      prd_summary: string;
+      tasks: string[];
+    }>(`/api/projects/${projectName}/architecture`),
+  simulateAgentRun: (projectName: string, idea: string = '') =>
+    request<{ status: string; task_id: string; project_name: string }>('/api/agents/simulate-run', {
+      method: 'POST',
+      body: JSON.stringify({ project_name: projectName, idea }),
+    }),
+  interactWithAgent: (agentId: string, message: string) =>
+    request<{ agent_id: string; reply: string }>('/api/agents/interact', {
+      method: 'POST',
+      body: JSON.stringify({ agent_id: agentId, message }),
+    }),
+
   // Documentation & API Monitoring
   getProjectDocs: (projectName: string) =>
     request<{ project_name: string; artifacts: DocArtifact[] }>(`/api/docs/artifacts/${projectName}`),
